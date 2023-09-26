@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Mockup</title>
+    <!-- Đường dẫn đến CSS của Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Đường dẫn đến JavaScript của Bootstrap (tùy chọn) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+      /* Định dạng cho scroll view */
+      .scroll-view {
+        width: 300px; /* Giảm độ rộng để có thêm không gian cho scroll view khác */
+        height: 250px;
+        overflow: auto; /* Tạo thanh cuộn */
+        border: 2px solid #ccc;
+        margin: 20px;
+        justify-content: space-between; /* Canh lề bên trái và bên phải */
+      }
+
+      /* Định dạng cho hình ảnh mini */
+      .file-thumbnail {
+        width: 50px;
+        height: 50px;
+        margin-right: 20px; /* Khoảng cách giữa hình ảnh và tên file */
+      }
+
+      /* Định dạng cho danh sách tên tệp */
+      .file-list {
+        list-style-type: none; /* Loại bỏ kiểu đánh dấu danh sách */
+        padding: 1; /* Loại bỏ padding mặc định của danh sách */
+        margin-top: 15px; /* Khoảng cách từ danh sách tên đến hình ảnh */
+      }
+
+      /* Định dạng container chứa các trường upload file và scroll view */
+      .container {
+        display: flex;
+        flex-direction: row; /* Hiển thị theo chiều ngang */
+        align-items: flex-start; /* Canh lề trên của các phần tử con */
+        gap: 5px; /* Khoảng cách giữa các phần tử con */
+        border: 4px solid #ccc;
+        justify-content: space-between; /* Canh lề bên trái và bên phải */
+      }
+
+      /* Định dạng cho trường upload file */
+      .upload-field {
+        flex: 1; /* Phần trăm chiều rộng tự động điều chỉnh */
+      }
+      /* Định dạng container chứa Mockup Information và EXIF Data */
+      .info-container {
+        display: flex;
+        justify-content: space-between; /* Canh lề bên trái và bên phải */
+      }
+
+      /* Định dạng fieldset cho Mockup Information và EXIF Data */
+      .info-fieldset {
+        flex: 1; /* Phần trăm chiều rộng tự động điều chỉnh */
+        border: 2px solid #ccc;
+        padding: 10px;
+        margin-top: 20px;
+      }
+      /* Định dạng fieldset cho CSV Information */
+      fieldset#csv-info {
+        border: 2px solid #ccc;
+        padding: 10px;
+        margin-top: 20px;
+      }
+        /* Định dạng nút "Create" */
+        input[type="submit"]#create-button {
+        }
+
+        /* Định dạng nút "Đăng Xuất" */
+        input[type="submit"]#logout-button {
+        }
+
+        /* Hover effect cho nút */
+        input[type="submit"]:hover {
+            opacity: 0.8;
+        }
+    </style>
+  </head>
+  <body>
+        <div class="container">
+        <h1 class="mt-5">Tool Mockup</h1>
+        <form action="/overlay" method="post" enctype="multipart/form-data" class="mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="background" class="form-label">Upload Background:</label>
+                    <input type="file" class="form-control" name="background" accept=".jpg, .jpeg, .png" multiple required>
+                    <!-- Scroll view cho Background -->
+                    <div class="scroll-view mt-3" id="background-scroll-view">
+                        <ul class="file-list" id="background-file-list"></ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="overlay" class="form-label">Upload Design:</label>
+                    <input type="file" class="form-control" name="overlay" accept=".png" multiple required>
+                    <!-- Scroll view cho Design -->
+                    <div class="scroll-view mt-3" id="design-scroll-view">
+                        <ul class="file-list" id="design-file-list"></ul>
+                    </div>
+                </div>
+            </div>
+      <div class="info-container">
+        <fieldset class="info-fieldset">
+          <legend>Mockup Information</legend>
+          <label for="x">Left:</label>
+          <input type="number" name="x" required /><br /><br />
+
+          <label for="y">Top:</label>
+          <input type="number" name="y" required /><br /><br />
+
+          <label for="width">Size (px):</label>
+          <input type="number" name="width" required /><br /><br />
+
+          <label for="scale-percent">Scale Design (%):</label>
+          <input type="text" name="scale-percent" pattern="^\d+(\.\d{1,2})?|100(\.00)?$" required /><br /><br />
+        
+          <label for="rotation">Rotation:</label>
+          <input type="number" step="1" name="rotation" required /><br /><br />
+
+          <label for="output-format">Format Type:</label>
+          <select id="output-format" name="output-format">
+            <option value="jpg">JPG</option>
+            <option value="webp">WebP</option>
+          </select>
+          <br /><br />
+        </fieldset>
+
+        <fieldset class="info-fieldset">
+          <legend>Exif Data</legend>
+          <!-- Lựa chọn thời gian ngẫu nhiên -->
+          <div class="form-group">
+            <input
+              type="radio"
+              class="form-check-input"
+              name="date-taken-option"
+              value="random" 
+              checked
+              />
+            <label class="form-check-label">Date Taken</label><br /><br />
+          </div>
+          <!-- Trường nhập liệu cho thời gian ngẫu nhiên -->
+          <div class="form-group">
+            <label for="start_datetime">Start Time:</label>
+            <input
+              type="datetime-local"
+              class="form-control"
+              name="start_datetime"
+              id="start_datetime"
+              step="1"
+               /><br />
+          </div>
+          <div class="form-group">
+            <label for="end_datetime">End Time:</label>
+            <input
+              type="datetime-local"
+              class="form-control"
+              name="end_datetime"
+              id="end_datetime"
+              step="1"
+               /><br />
+          </div>
+          <span id="randomDateTakenHelp" style="color: red"></span>
+
+          <label for="author">Author:</label>
+          <input type="text" name="author" required /><br /><br />
+          <label for="copyright">Copyright:</label>
+          <input type="text" name="copyright" required /><br /><br />
+        </fieldset>
+      </div>
+      <fieldset id="csv-info">
+        <legend>CSV Information</legend>
+        <label for="custom-filename">File Name:</label>
+        <input
+          type="text"
+          id="custom-filename"
+          name="custom_filename"
+          placeholder="CSV file name"
+          required />
+        <input type="text" name="price" placeholder="Price" required />
+        <input type="text" name="categories" placeholder="Categories" required />
+      </fieldset>
+        <input type="submit" id="create-button" value="Create" />
+    </form>
+    <form action="/logout" method="get">
+      <input type="submit" id="logout-button" value="Log Out" />
+    </form>
+    <script>
+      // Hàm để hiển thị list các file đã chọn trong scroll view và danh sách tên file
+      function displaySelectedFiles(
+        inputElement,
+        scrollElement,
+        fileListElement
+      ) {
+        const files = inputElement.files;
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          // Tạo element <li> chứa ảnh mini và tên file
+          createFileListItem(file, scrollElement, fileListElement);
+        }
+      }
+
+      // Hàm để tạo và hiển thị element <li> cho file và tên file
+      function createFileListItem(file, scrollElement, fileListElement) {
+        const listItem = document.createElement("li");
+        scrollElement.appendChild(listItem);
+
+        // Tạo hình ảnh mini và thêm vào element <li>
+        createThumbnail(file, listItem);
+
+        // Tạo phần tử chứa tên file và thêm vào element <li>
+        const fileNameElement = document.createElement("span");
+        fileNameElement.innerText = file.name;
+        listItem.appendChild(fileNameElement);
+
+        // Thêm element <li> vào danh sách tên file
+        fileListElement.appendChild(listItem);
+      }
+
+      // Hàm để tạo và hiển thị hình ảnh mini của file
+      function createThumbnail(file, listItem) {
+        const thumbnail = document.createElement("img");
+        thumbnail.classList.add("file-thumbnail");
+        thumbnail.file = file;
+        listItem.appendChild(thumbnail);
+
+        const reader = new FileReader();
+        reader.onload = (function (thumbnailImg) {
+          return function (e) {
+            thumbnailImg.src = e.target.result;
+          };
+        })(thumbnail);
+        reader.readAsDataURL(file);
+      }
+
+      // Bắt event khi user chọn file background và design
+      const backgroundInput = document.querySelector(
+        'input[name="background"]'
+      );
+      const overlayInput = document.querySelector('input[name="overlay"]');
+      const backgroundScrollView = document.getElementById(
+        "background-scroll-view"
+      );
+      const designScrollView = document.getElementById("design-scroll-view");
+      const backgroundFileList = document.getElementById(
+        "background-file-list"
+      );
+      const designFileList = document.getElementById("design-file-list");
+
+      backgroundInput.addEventListener("change", () => {
+        displaySelectedFiles(
+          backgroundInput,
+          backgroundScrollView,
+          backgroundFileList
+        );
+      });
+      overlayInput.addEventListener("change", () => {
+        displaySelectedFiles(overlayInput, designScrollView, designFileList);
+      });
+
+      <!-- Bắt event khi user chọn radio button tùy chọn date_taken -->
+      const dateTakenOption = document.getElementsByName("date-taken-option");
+      const customDateTakenInput = document.getElementById("custom-date-taken");
+      const randomDateTakenInput = document.getElementById(
+        "randomDateTakenHelp"
+      );
+      const startDatetimeInput = document.getElementById("start_datetime");
+      const endDatetimeInput = document.getElementById("end_datetime");
+
+      // Xử lý event khi option thay đổi
+      for (let i = 0; i < dateTakenOption.length; i++) {
+        dateTakenOption[i].addEventListener("change", function () {
+          if (this.value === "custom") {
+            customDateTakenInput.removeAttribute("disabled");
+            startDatetimeInput.setAttribute("disabled", true);
+            endDatetimeInput.setAttribute("disabled", true);
+            randomDateTakenInput.innerText = "";
+          } else if (this.value === "random") {
+            customDateTakenInput.setAttribute("disabled", true);
+            startDatetimeInput.removeAttribute("disabled");
+            endDatetimeInput.removeAttribute("disabled");
+            customDateTakenInput.value = "";
+            customDateTakenHelp.innerText = "";
+          }
+        });
+      }
+
+      // Bắt event khi giá trị datetime-local thay đổi
+      customDateTakenInput.addEventListener("change", function () {
+        // Định dạng giá trị datetime thành chuỗi YYYY-MM-DDTHH:mm:ss
+        let datetime = this.value.replace("T", " ");
+
+        // Kiểm tra xem giá trị có chứa giây không, nếu không thì thêm ':00'
+        if (datetime.split(":").length === 2) {
+          datetime += ":00";
+        }
+
+        // Kiểm tra định dạng của giá trị datetime
+        const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+        if (!regex.test(datetime)) {
+          customDateTakenHelp.innerText =
+            "Định dạng không hợp lệ. Vui lòng sử dụng YYYY-MM-DDTHH:mm:ss.";
+          this.setCustomValidity("Invalid datetime format");
+        } else {
+          customDateTakenHelp.innerText = "";
+          this.setCustomValidity("");
+        }
+      });
+
+      // Bắt event khi giá trị datetime-local của thời gian bắt đầu thay đổi
+      startDatetimeInput.addEventListener("change", function () {
+        let startTime = this.value.replace("T", " ");
+        // Kiểm tra xem giá trị có chứa giây không, nếu không thì thêm ':00'
+        if (startTime.split(":").length === 2) {
+          startTime += ":00";
+        }
+        // Kiểm tra định dạng của giá trị datetime
+        const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+        if (!regex.test(startTime)) {
+          randomDateTakenInput.innerText =
+            "Định dạng không hợp lệ. Vui lòng sử dụng YYYY-MM-DDTHH:mm.";
+          this.setCustomValidity("Invalid datetime format");
+        } else {
+          randomDateTakenInput.innerText = "";
+          this.setCustomValidity("");
+        }
+      });
+
+      // Bắt event khi giá trị datetime-local của thời gian kết thúc thay đổi
+      endDatetimeInput.addEventListener("change", function () {
+        let endTime = this.value.replace("T", " ");
+        // Kiểm tra xem giá trị có chứa giây không, nếu không thì thêm ':00'
+        if (endTime.split(":").length === 2) {
+          endTime += ":00";
+        }
+        // Kiểm tra định dạng của giá trị datetime
+        const regex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+        if (!regex.test(endTime)) {
+          randomDateTakenInput.innerText =
+            "Định dạng không hợp lệ. Vui lòng sử dụng YYYY-MM-DDTHH:mm.";
+          this.setCustomValidity("Invalid datetime format");
+        } else {
+          randomDateTakenInput.innerText = "";
+          this.setCustomValidity("");
+        }
+      });
+    </script>
+  </body>
+</html>
